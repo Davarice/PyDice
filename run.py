@@ -12,11 +12,13 @@ d6
 import re
 from numpy import random as npr
 
-DicePattern = re.compile(r"(\b\dd\d+([-+*/]\d+)?\b)")
+
+DicePattern = re.compile(r"(\b\d+d\d+([-+*/]\d+)?\b)")
 Last = []
 
 
 def get_number(nmin, nmax):
+    """Return a number between nmin and nmax, inclusive"""
     return npr.randint(nmin, nmax + 1)
 
 
@@ -36,8 +38,9 @@ class DieRoll:
 
 
 class Dice:
-    def __init__(self, size, quantity=1, add_each=0, add_sum=0):
-        self.size = size
+    def __init__(self, size, quantity=1, add_each=0, add_sum=0, low=1):
+        self.low = low
+        self.high = size
         self.quantity = quantity
         self.add_each = add_each
         self.add_sum = add_sum
@@ -45,8 +48,16 @@ class Dice:
     def roll(self):
         result = []
         for i in range(self.quantity):
-            die = get_number(1, self.size)
+            die = get_number(self.low, self.high)
             result.append(die)
+        return DieRoll(*result, self.add_each, self.add_sum)
+
+    def __str__(self):
+        truth = [self.quantity, self.add_each, True, self.high, self.add_each, self.add_each, self.add_each, self.add_sum, self.add_sum]
+        parts = [self.quantity, "(", "d", self.high, "+", self.add_each, ")", "+", self.add_sum]
+
+        out = "".join([str(parts[i]) for i in range(len(parts)) if truth[i]])
+        return out
 
 
 def parse_dice(expr):
@@ -61,8 +72,23 @@ def parse_dice(expr):
     # subex = intersection_of(left, right)
     # expr = re.sub(expr, subex, "{d}")
     # expr = expr.format(d="asdf")
+    if not expr:
+        return
 
-    return expr
+    dice, *addends = expr.split("+")
+
+    if len(dice) > 1:
+        [q, s] = dice.split("d")
+    else:
+        q, s = 1, dice[0]
+
+    addends = [int(n) for n in addends]
+    q = int(q)
+    s = int(s)
+
+    dout = Dice(s, q, add_sum = sum(addends))
+
+    return dout
 
 
 def roll(istr):
@@ -72,7 +98,7 @@ def roll(istr):
         dice = Last
     else:
         expressions = list(DicePattern.finditer(istr.lower()))
-        dice = [parse_dice(expr.group(0)) for expr in expressions]
+        dice = [str(parse_dice(expr.group(0))) for expr in expressions]
         # for expr in expressions:
             # dice.append(parse_dice(expr))
         Last = dice
