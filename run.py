@@ -1,20 +1,10 @@
-"""
-
-d6
-1d8
-2d4
-2d10+2
-2(d10+2)
-(2d10)+2
-
-"""
-
 import re
 from numpy import random as npr
 
 
 DicePattern = re.compile(r"(\b\d+d\d+([-+*/]\d+)?\b)")
 Last = []
+I = 0
 
 
 def get_number(nmin, nmax):
@@ -23,14 +13,15 @@ def get_number(nmin, nmax):
 
 
 class DieRoll:
-    def __init__(self, *results, add_each=0, add_sum=0):
+    def __init__(self, results, add_each=0, add_sum=0, src=None):
         self.res = results
         self.add_each = add_each
         self.add_sum = add_sum
+        self.src = src or "Dice"
 
     @property
     def results(self):
-        return [n + self.add_each for n in self.res]
+        return [int(n) + self.add_each for n in self.res]
 
     @property
     def total(self):
@@ -46,11 +37,12 @@ class Dice:
         self.add_sum = add_sum
 
     def roll(self):
-        result = []
-        for i in range(self.quantity):
-            die = get_number(self.low, self.high)
-            result.append(die)
-        return DieRoll(*result, self.add_each, self.add_sum)
+        return DieRoll(
+            results=[get_number(self.low, self.high) for _ in range(self.quantity)],
+            add_each=self.add_each,
+            add_sum=self.add_sum,
+            src=self,
+        )
 
     def __str__(self):
         truth = [
@@ -106,19 +98,19 @@ def roll(istr):
         dice = Last
     else:
         expressions = list(DicePattern.finditer(istr.lower()))
-        dice = [str(parse_dice(expr.group(0))) for expr in expressions]
-        # for expr in expressions:
-        # dice.append(parse_dice(expr))
+        dice = [parse_dice(expr.group(0)) for expr in expressions]
         Last = dice
-    print(dice)
 
-    results = [DieRoll(die) for die in dice]
+    results = [die.roll() for die in dice]
     return results
 
 
 def roll_and_print(istr):
     results = roll(istr)
-    # print(results)
+    for i in range(len(results)):
+        for number in results[i].results:
+            print(f"d{results[i].src.high}: {number}")
+        print(f"{results[i].src} TOTAL: {results[i].total}")
 
 
 if __name__ == "__main__":
