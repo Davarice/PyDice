@@ -53,8 +53,28 @@ class Dice:
         return DieRoll(*result, self.add_each, self.add_sum)
 
     def __str__(self):
-        truth = [self.quantity, self.add_each, True, self.high, self.add_each, self.add_each, self.add_each, self.add_sum, self.add_sum]
-        parts = [self.quantity, "(", "d", self.high, "+", self.add_each, ")", "+", self.add_sum]
+        truth = [
+            self.quantity,
+            self.add_each,
+            True,
+            self.high,
+            self.add_each,
+            self.add_each,
+            self.add_each,
+            self.add_sum,
+            self.add_sum,
+        ]
+        parts = [
+            self.quantity,
+            "(",
+            "d",
+            self.high,
+            "+",
+            self.add_each,
+            ")",
+            "+",
+            self.add_sum,
+        ]
 
         out = "".join([str(parts[i]) for i in range(len(parts)) if truth[i]])
         return out
@@ -86,7 +106,7 @@ def parse_dice(expr):
     q = int(q)
     s = int(s)
 
-    dout = Dice(s, q, add_sum = sum(addends))
+    dout = Dice(s, q, add_sum=sum(addends))
 
     return dout
 
@@ -100,7 +120,7 @@ def roll(istr):
         expressions = list(DicePattern.finditer(istr.lower()))
         dice = [str(parse_dice(expr.group(0))) for expr in expressions]
         # for expr in expressions:
-            # dice.append(parse_dice(expr))
+        # dice.append(parse_dice(expr))
         Last = dice
     print(dice)
 
