@@ -82,16 +82,6 @@ class Dice:
 
 def parse_dice(expr):
     # Parse a "word" into a number of dice and maybe additions, and return one Dice object for them
-
-    # left = re.search(r"(.*", expr)  # Find everything to the right of the first parenthesis
-    # right = re.FindFromRight(".*)", expr)  # Find everything to the left of the last parenthesis
-    #
-    # if (left and not right) or (right and not left):
-    #     raise ValueError("Dice expression '{}' contains unmatched parenthesis".format(expr))
-
-    # subex = intersection_of(left, right)
-    # expr = re.sub(expr, subex, "{d}")
-    # expr = expr.format(d="asdf")
     if not expr:
         return
 
@@ -106,9 +96,7 @@ def parse_dice(expr):
     q = int(q)
     s = int(s)
 
-    dout = Dice(s, q, add_sum=sum(addends))
-
-    return dout
+    return Dice(s, q, add_sum=sum(addends))
 
 
 def roll(istr):
