@@ -1,10 +1,19 @@
+#! /usr/bin/env python3
+
 import re
 from numpy import random as npr
 
 
-DicePattern = re.compile(r"(\b\d+d\d+([-+*/]\d+)?\b)")
+DicePattern = re.compile(r"(\b\d+d\d+([+]\d+)?\b)")
 Last = []
+
 I = 0
+Colors = ["\x1b[91m",
+          "\x1b[93m",
+          "\x1b[92m",
+          "\x1b[96m",
+          "\x1b[94m",
+          "\x1b[95m"]
 
 
 def get_number(nmin, nmax):
@@ -96,6 +105,7 @@ def roll(istr):
 
     if not istr:
         dice = Last
+        print("REROLL")
     else:
         expressions = list(DicePattern.finditer(istr.lower()))
         dice = [parse_dice(expr.group(0)) for expr in expressions]
@@ -107,10 +117,13 @@ def roll(istr):
 
 def roll_and_print(istr):
     results = roll(istr)
+    global I
     for i in range(len(results)):
         for number in results[i].results:
-            print(f"d{results[i].src.high}: {number}")
-        print(f"{results[i].src} TOTAL: {results[i].total}")
+            print(f"{Colors[I]}d{results[i].src.high}: {number}\x1b[0m")
+        print(f"{Colors[I]}{results[i].src} TOTAL: {results[i].total}\x1b[0m")
+        I += 1
+        I %= len(Colors)
 
 
 if __name__ == "__main__":
